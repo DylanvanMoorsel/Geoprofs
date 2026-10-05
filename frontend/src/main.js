@@ -14,8 +14,15 @@ const app = createApp(App)
 
 app.use(PrimeVue, {
   theme: {
-    preset: Aura
-  }
+    preset: Aura,
+    options: {
+      darkModeSelector: false,
+      cssLayer: {
+        name: 'primevue',
+        order: 'theme, base, primevue',
+      },
+    },
+  },
 })
 app.use(createPinia())
 app.use(router)
