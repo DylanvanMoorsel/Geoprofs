@@ -7,6 +7,9 @@ import { ref } from 'vue'
 import logo from './assets/logo.svg'
 import { useRouter } from 'vue-router'
 import Select from 'primevue/select';
+import Toast from 'primevue/toast';
+import {useToast} from 'primevue/usetoast';
+
 const router = useRouter()
 
 const startDate = ref('')
@@ -18,13 +21,22 @@ const leaveTypes = ref([
     { label: 'Afspraak', value: 'afspraak' },
     { label: 'Overig', value: 'overig' }
 ]);
+
+const toast = useToast();
+
+function submitRequest(){
+  console.log('klik')
+  toast.add({severity:'success', summary:'Verlof aanvraag is verstuurd', detail:'De manager zal deze zsm beoordelen', life: 3000})
+}
 </script>
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold text-black"> Verlof Aanvragen</h1>
-    <h2 class= "text-lg text-gray-600">Dien uw aanvraag in. Uw manager zal deze beoordelen.</h2>
-    <hr class="border-gray-400"></hr>
+    <div class="px-10 py-6">
+      <h1 class="text-3xl font-bold text-black"> Verlof Aanvragen</h1>
+      <h2 class= "text-lg text-gray-600">Dien uw aanvraag in. Uw manager zal deze beoordelen.</h2>
+      <hr class="border-gray-400"></hr>
+    </div>
     <div class="min-h-screen flex justify-center items-center px-4 py-8">
       <Card class="w-full max-w-2xl p-6 bg-[#FAF8F5] shadow-md">
         <template #title>
@@ -53,7 +65,7 @@ const leaveTypes = ref([
             </div>
             <div class="flex justify-end gap-4">
               <Button label="Annuleren" class="bg-[#FFFFFF] text-black hover:bg-[#F24438] border border-gray-400" size="large" />
-              <Button label="Verlof indienen" class="bg-[#1A6CC4] text-white hover:bg-[#0056b3]" size="large" />
+              <Button label="Verlof indienen" class="bg-[#1A6CC4] text-white hover:bg-[#0056b3]" size="large" @click="submitRequest" />
             </div>
 
       
