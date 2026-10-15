@@ -25,7 +25,6 @@ const leaveTypes = ref([
 const toast = useToast();
 
 function submitRequest(){
-  console.log('klik')
   toast.add({severity:'success', summary:'Verlof aanvraag is verstuurd', detail:'De manager zal deze zsm beoordelen', life: 3000})
 }
 </script>
