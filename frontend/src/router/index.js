@@ -3,6 +3,7 @@ import Login from '@/login.vue'
 import AdminLogin from '@/AdminLogin.vue'
 import AdminOtp from '@/AdminOtp.vue'
 import RequestLeave from '@/RequestLeave.vue'
+import ProfilePage from '@/ProfilePage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +12,8 @@ const router = createRouter({
     { path: '/adminlogin', name: 'adminlogin', component: AdminLogin },
     { path: '/adminotp', name: 'adminotp', component: AdminOtp },
     { path: '/requestleave', name: 'requestleave', component: RequestLeave },
+    { path: '/profiel', name: 'profile', component: ProfilePage },
+
     { path: '/', redirect: '/login' },
   ],
 })
