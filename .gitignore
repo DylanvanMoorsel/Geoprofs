@@ -1,0 +1,16 @@
+/vendor/
+/node_modules/
+/frontend/node_modules/
+
+.env
+.env.*
+!.env.example
+
+/bootstrap/cache/*.php
+
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+/frontend/dist/
