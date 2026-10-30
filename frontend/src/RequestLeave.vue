@@ -22,6 +22,9 @@ const leaveTypes = ref([
     { label: 'Overig', value: 'overig' }
 ]);
 
+
+const minDate = ref(new Date());
+
 const toast = useToast();
 
 function submitRequest(){
@@ -47,11 +50,11 @@ function submitRequest(){
             <div class="flex gap-4">
               <div class="flex min-w-0 flex-1 flex-col gap-2">
                 <label for="startDate" class="text-black">Startdatum (van)</label>
-                <DatePicker id="startDate" v-model="startDate" placeholder="Startdatum(van)" class="bg-white border rounded-md border-gray-400" size="large" fluid />
+                <DatePicker id="startDate" v-model="startDate" dateFormat="dd/mm/yy" :minDate="minDate" :manualInput="false"  placeholder="Startdatum(van)" class="bg-white border rounded-md border-gray-400" size="large" fluid />
               </div>
               <div class="flex min-w-0 flex-1 flex-col gap-2">
                 <label for="endDate" class="text-black">Einddatum (tot)</label>
-                <DatePicker id="endDate" v-model="endDate" placeholder="Einddatum(tot)" class="bg-white border rounded-md border-gray-400" size="large" fluid />
+                <DatePicker id="endDate" v-model="endDate" dateFormat="dd/mm/yy" :minDate="minDate" :manualInput="false" placeholder="Einddatum(tot)" class="bg-white border rounded-md border-gray-400" size="large" fluid />
               </div>
             </div>
             <div class="flex flex-col gap-2">
@@ -66,8 +69,6 @@ function submitRequest(){
               <Button label="Annuleren" class="bg-[#FFFFFF] text-black hover:bg-[#F24438] border border-gray-400" size="large" />
               <Button label="Verlof indienen" class="bg-[#1A6CC4] text-white hover:bg-[#0056b3]" size="large" @click="submitRequest" />
             </div>
-
-      
           </div>
         </template>
       </Card>
