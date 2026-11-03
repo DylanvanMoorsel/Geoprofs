@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Login from '../login.vue'
-import AdminOtp from '../AdminOtp.vue'
 import ManagerTest from '../ManagerTest.vue'
 import Login from '@/login.vue'
 import AdminLogin from '@/AdminLogin.vue'
@@ -26,8 +24,6 @@ const router = createRouter({
     { path: '/profielInstellingen', name: 'profielInstellingen', component: ProfielInstellingen },
     { path: '/requestleave', name: 'requestleave', component: RequestLeave },
     { path: '/profiel', name: 'profile', component: ProfilePage },
-
-    { path: '/', redirect: '/login' },
   ],
 })
 
