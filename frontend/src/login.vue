@@ -8,6 +8,7 @@ import logo from './assets/logo.svg'
 
 const username = ref('')
 const password = ref('')
+
 </script>
 
 <template>
@@ -30,7 +31,7 @@ const password = ref('')
             <Password inputId="password" v-model="password" :feedback="false" toggleMask inputClass="bg-white border border-gray-400" fluid />
           </div>
 
-          <Button label="Inloggen" class="bg-[#1A6CC4] text-white hover:bg-[#0056b3]" fluid />
+          <Button label="Inloggen" class="bg-[#1A6CC4] text-white hover:bg-[#0056b3]" @click="$router.push('/medewerkerDashboard')" fluid />
           <div class="text-center text-black">
             <a href="#" class="text-[#1A6CC4] hover:underline">Wachtwoord vergeten?</a>
           </div>
