@@ -86,7 +86,7 @@ async function verify() {
 
           <p v-if="error" class="text-center text-sm text-red-600">{{ error }}</p>
 
-          <Button type="submit" label="Inloggen" :loading="loading" class="bg-[#1A6CC4] text-white hover:bg-[#0056b3]" fluid />
+          <Button type="submit" label="Inloggen" :loading="loading" class="bg-[#1A6CC4] text-white hover:bg-[#0056b3]" @click="$router.push('/managerDashboard')" fluid />
           <div class="text-center text-black">
             <a href="#" class="text-[#1A6CC4] hover:underline">Wachtwoord vergeten?</a>
           </div>
