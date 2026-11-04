@@ -2,24 +2,36 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $planning = Department::create(['name' => 'Planning']);
+        Department::create(['name' => 'Techniek']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $manager = User::create([
+            'first_name' => 'Manon',
+            'last_name' => 'Manager',
+            'email' => 'manager@geoprofs.nl',
+            'password' => 'password123',
+            'role' => 'manager',
+            'department_id' => $planning->id,
+            'vacation_hours' => 200,
+        ]);
+
+        User::create([
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => 'test@geoprofs.nl',
+            'password' => 'password123',
+            'role' => 'employee',
+            'department_id' => $planning->id,
+            'manager_id' => $manager->id,
+            'vacation_hours' => 176,
         ]);
     }
 }

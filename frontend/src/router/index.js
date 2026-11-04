@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import ManagerTest from '../ManagerTest.vue'
 import Login from '@/login.vue'
 import AdminLogin from '@/AdminLogin.vue'
 import AdminOtp from '@/AdminOtp.vue'
@@ -11,12 +12,13 @@ import ProfilePage from '@/ProfilePage.vue'
 import EmployeeDashboard from '@/EmployeeDashboard.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
-    { path: '/login', name: 'login', component: Login },
-    { path: '/adminlogin', name: 'adminlogin', component: AdminLogin },
-    { path: '/adminotp', name: 'adminotp', component: AdminOtp },
     { path: '/', redirect: '/login' },
+    { path: '/login', component: Login },
+    { path: '/adminlogin', component: AdminLogin },
+    { path: '/adminotp', component: AdminOtp },
+    { path: '/manager-test', component: ManagerTest },
     { path: '/managerDashboard', name: 'managerdashboard', component: ManagerDashboard },
     { path: '/beoordelen', name: 'beoordelen', component: Beoordelen },
     { path: '/afdelingsbezetting', name: 'afdelingsbezetting', component: Afdelingsbezetting },
@@ -24,8 +26,6 @@ const router = createRouter({
     { path: '/requestleave', name: 'requestleave', component: RequestLeave },
     { path: '/profiel', name: 'profile', component: ProfilePage },
     { path: '/medewerkerDashboard', name: 'medewerkerDashboard', component: EmployeeDashboard },
-
-    { path: '/', redirect: '/login' },
   ],
 })
 

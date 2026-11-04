@@ -2,27 +2,31 @@
 
 namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['first_name', 'last_name', 'email', 'password', 'department_id', 'role', 'manager_id'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'role',
+        'department_id',
+        'manager_id',
+        'vacation_hours',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -36,13 +40,13 @@ class User extends Authenticatable
         return $this->belongsTo(Department::class);
     }
 
-    public function absences()
+    public function manager()
     {
-        return $this->hasMany(Absence::class);
+        return $this->belongsTo(User::class, 'manager_id');
     }
 
-    protected function name(): Attribute
-{
-    return Attribute::get(fn () => trim($this->first_name.' '.$this->last_name));
-}
+    public function employees()
+    {
+        return $this->hasMany(User::class, 'manager_id');
+    }
 }
