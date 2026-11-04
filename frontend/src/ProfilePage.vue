@@ -22,7 +22,7 @@ import EmployeeSidebar from './components/EmployeeSidebar.vue'
         </hr>
       </div>
       <div class="flex justify-center px-4 py-6">
-        <Card class="w-full max-w-2xl p-6 bg-[#FAF8F5] shadow-md">
+        <Card class="border border-[#E8E3DF] shadow-none rounded-xl flex-1">
           <template #title>
             <span class="mb-4 text-2xl text-black">Wachtwoord wijzigen</span>
           </template>
