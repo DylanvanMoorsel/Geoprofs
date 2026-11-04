@@ -29,7 +29,7 @@ const navItems = [
         label: 'Verlof Aanvragen',
         icon: icon2,
         activeIcon: icon2Active,
-        path: '/verlofAanvragen'
+        path: '/requestleave'
     },
     {
         label: 'Mijn Aanvragen',
@@ -41,7 +41,7 @@ const navItems = [
         label: 'Profiel & Instellingen',
         icon: icon4,
         activeIcon: icon4Active,
-        path: '/profielInstellingen'
+        path: '/profiel'
     }
 ]
 
@@ -114,7 +114,7 @@ function logout() {
                         Landmeter
                     </span>
                 </div>
-                
+
                 <Button
                     severity="danger"
                     text

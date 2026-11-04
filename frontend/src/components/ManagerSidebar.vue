@@ -21,7 +21,7 @@ const navItems = [
     { label: 'Manager Dashboard', icon: icon1, activeIcon: icon1Active, path: '/managerDashboard' },
     { label: 'Beoordelen', icon: icon2, activeIcon: icon2Active, path: '/beoordelen' },
     { label: 'Afdelingsbezetting', icon: icon3, activeIcon: icon3Active, path: '/afdelingsbezetting' },
-    { label: 'Profiel & Instellingen', icon: icon4, activeIcon: icon4Active, path: '/profielInstellingen' },
+    { label: 'Profiel & Instellingen', icon: icon4, activeIcon: icon4Active, path: '/profiel' },
 ]
 
 function logout() {
