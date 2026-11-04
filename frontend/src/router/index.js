@@ -8,6 +8,7 @@ import Afdelingsbezetting from '@/Afdelingsbezetting.vue'
 import ProfielInstellingen from '@/ProfielInstellingen.vue'
 import RequestLeave from '@/RequestLeave.vue'
 import ProfilePage from '@/ProfilePage.vue'
+import EmployeeDashboard from '@/EmployeeDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +23,7 @@ const router = createRouter({
     { path: '/profielInstellingen', name: 'profielInstellingen', component: ProfielInstellingen },
     { path: '/requestleave', name: 'requestleave', component: RequestLeave },
     { path: '/profiel', name: 'profile', component: ProfilePage },
+    { path: '/medewerkerDashboard', name: 'medewerkerDashboard', component: EmployeeDashboard },
 
     { path: '/', redirect: '/login' },
   ],
