@@ -2,7 +2,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import EmployeeSidebar from './components/EmployeeSidebar.vue'
+import Sidebar from './components/EmployeeSidebar.vue'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 
@@ -56,7 +56,7 @@ const recentRequests = ref([
 ])
 
 function requestLeave() {
-    router.push('/verlofAanvragen')
+    router.push('/requestleave')
 }
 
 function statusClass(status) {
@@ -79,7 +79,7 @@ function statusClass(status) {
 <template>
     <div class="flex min-h-screen">
 
-        <EmployeeSidebar />
+        <Sidebar />
 
         <main class="flex-1 min-w-0 min-h-screen bg-[#FAF8F5] p-8 text-[#292524]">
 

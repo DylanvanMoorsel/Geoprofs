@@ -7,12 +7,12 @@ import logo from './assets/logo.svg'
 import { useRouter } from 'vue-router'
 import Select from 'primevue/select';
 import Password from 'primevue/password'
-import EmployeeSidebar from './components/EmployeeSidebar.vue'
+import Sidebar from './components/EmployeeSidebar.vue'
 </script>
 
 <template>
   <div class="flex">
-    <EmployeeSidebar />
+    <Sidebar />
     <main class="flex-1 min-h-screen bg-[#FAF8F5] p-8 text-[#292524]">
       <div class="px-10 py-6">
         <h1 class="text-3xl font-bold text-black">Profiel & Instellingen</h1>

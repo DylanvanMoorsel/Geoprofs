@@ -8,6 +8,7 @@ import Beoordelen from '@/Beoordelen.vue'
 import Afdelingsbezetting from '@/Afdelingsbezetting.vue'
 import RequestLeave from '@/RequestLeave.vue'
 import ProfilePage from '@/ProfilePage.vue'
+import ManagerProfilePage from '@/ManagerProfilePage.vue'
 import EmployeeDashboard from '@/EmployeeDashboard.vue'
 
 const router = createRouter({
@@ -23,6 +24,7 @@ const router = createRouter({
     { path: '/afdelingsbezetting', name: 'afdelingsbezetting', component: Afdelingsbezetting },
     { path: '/requestleave', name: 'requestleave', component: RequestLeave },
     { path: '/profiel', name: 'profile', component: ProfilePage },
+    { path: '/managerprofiel', name: 'managerprofile', component: ManagerProfilePage },
     { path: '/medewerkerDashboard', name: 'medewerkerDashboard', component: EmployeeDashboard },
   ],
 })
