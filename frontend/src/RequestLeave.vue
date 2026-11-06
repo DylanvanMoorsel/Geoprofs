@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router'
 import Select from 'primevue/select';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
-import EmployeeSidebar from './components/EmployeeSidebar.vue'
+import Sidebar from './components/EmployeeSidebar.vue'
 
 const router = useRouter()
 
@@ -35,7 +35,7 @@ function submitRequest() {
 
 <template>
   <div class="flex">
-    <EmployeeSidebar />
+    <Sidebar />
     <main class="flex-1 min-h-screen bg-[#FAF8F5] p-8 text-[#292524]">
       <div>
         <div class="px-10 py-6">
