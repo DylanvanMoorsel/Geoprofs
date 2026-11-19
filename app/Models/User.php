@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,6 +11,8 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    public const ROLE_MANAGER = 'manager';
 
     protected $fillable = [
         'first_name',
@@ -32,7 +35,18 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'vacation_hours' => 'float',
         ];
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::get(fn () => trim($this->first_name.' '.$this->last_name));
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === self::ROLE_MANAGER;
     }
 
     public function department()
@@ -48,5 +62,10 @@ class User extends Authenticatable
     public function employees()
     {
         return $this->hasMany(User::class, 'manager_id');
+    }
+
+    public function absences()
+    {
+        return $this->hasMany(Absence::class);
     }
 }
