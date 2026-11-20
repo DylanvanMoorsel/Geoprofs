@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\ManagerAbsenceController;
+use App\Http\Controllers\ManagerDashboardController;
+use App\Http\Controllers\ManagerOccupancyController;
+use App\Http\Controllers\AbsenceController;
+use App\Http\Controllers\EmployeeDashboardController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -112,5 +117,21 @@ Route::middleware('auth:sanctum')->group(function () {
             'department' => $employee->department->name,
             'vacation_hours' => $employee->vacation_hours,
         ]);
+    });
+
+    // Medewerker eigen dashboard en eigen verlof
+    Route::get('/employee/dashboard', [EmployeeDashboardController::class, 'show']);
+    Route::get('/absences', [AbsenceController::class, 'index']);
+    Route::post('/absences', [AbsenceController::class, 'store']);
+    Route::delete('/absences/{absence}', [AbsenceController::class, 'destroy']);
+    
+    // Manager dashboard, bezetting en aanvragen beoordelen
+    Route::prefix('manager')->middleware('role:manager')->group(function () {
+        Route::get('/dashboard', [ManagerDashboardController::class, 'show']);
+        Route::get('/occupancy', [ManagerOccupancyController::class, 'show']);
+        Route::get('/absences', [ManagerAbsenceController::class, 'index']);
+        Route::post('/absences/bulk', [ManagerAbsenceController::class, 'bulk']);
+        Route::post('/absences/{absence}/approve', [ManagerAbsenceController::class, 'approve']);
+        Route::post('/absences/{absence}/reject', [ManagerAbsenceController::class, 'reject']);
     });
 });
