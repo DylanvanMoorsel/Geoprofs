@@ -60,7 +60,7 @@ async function verify() {
     sessionStorage.removeItem('otpEmail')
 
     // Temporary test page, replace with the real manager page later
-    router.push('/manager-test')
+        router.push('/managerDashboard')
   } catch {
     error.value = 'De server is niet bereikbaar.'
   } finally {

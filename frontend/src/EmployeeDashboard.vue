@@ -1,59 +1,117 @@
-
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from './components/EmployeeSidebar.vue'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 
 const router = useRouter()
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://geoprofs.test/api'
 
 const employee = ref({
-    firstName: 'Willem',
-    lastName: 'Bakker',
-    role: 'Landmeter'
+    firstName: '',
+    lastName: '',
+    role: ''
 })
 
 const leaveStats = ref([
-    {
-        id: 1,
-        title: 'Vakantiedagen',
-        value: 18,
-        unit: 'dagen',
-        description: 'Beschikbaar van de 25'
-    },
-    {
-        id: 2,
-        title: 'Ziektedagen (opgenomen)',
-        value: 2,
-        unit: 'dagen',
-        description: 'Geregistreerd dit jaar'
-    },
-    {
-        id: 3,
-        title: 'Bijzonder Verlof',
-        value: 1,
-        unit: 'dag',
-        description: 'Opgenomen overige uren'
-    }
+    { id: 1, title: 'Vakantiedagen', value: 0, unit: 'dagen', description: 'Beschikbaar' },
+    { id: 2, title: 'Ziektedagen (opgenomen)', value: 0, unit: 'dagen', description: 'Geregistreerd dit jaar' },
+    { id: 3, title: 'Bijzonder Verlof', value: 0, unit: 'dag', description: 'Opgenomen overige uren' }
 ])
 
-const recentRequests = ref([
-    {
-        id: 1,
-        title: 'Vakantie Zomer',
-        period: '15 Jul 2026 - 29 Jul 2026',
-        duration: '10 werkdagen',
-        status: 'Goedgekeurd'
-    },
-    {
-        id: 2,
-        title: 'Tandartsbezoek',
-        period: '12 Apr 2026 (09:00)',
-        duration: '2 uur',
-        status: 'In behandeling'
+const recentRequests = ref([])
+const error = ref('')
+
+const typeLabels = {
+    vakantie: 'Vakantie',
+    ziekte: 'Ziekte',
+    afspraak: 'Afspraak',
+    overig: 'Overig'
+}
+
+const statusLabels = {
+    aangevraagd: 'In behandeling',
+    goedgekeurd: 'Goedgekeurd',
+    afgewezen: 'Afgewezen'
+}
+
+function formatDate(d) {
+    if (!d) return ''
+    return new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function applyData(data) {
+    const u = data.user ?? {}
+    employee.value = {
+        firstName: u.first_name ?? '',
+        lastName: u.last_name ?? '',
+        role: u.role ?? ''
     }
-])
+
+    const s = data.stats ?? {}
+    const reserved = s.reserved_vacation_hours ?? 0
+    leaveStats.value = [
+        {
+            id: 1,
+            title: 'Vakantiedagen',
+            value: s.vacation_days ?? 0,
+            unit: 'dagen',
+            description: reserved > 0 ? `Beschikbaar (${reserved} uur gereserveerd)` : 'Beschikbaar'
+        },
+        {
+            id: 2,
+            title: 'Ziektedagen (opgenomen)',
+            value: s.sick_days_this_year ?? 0,
+            unit: 'dagen',
+            description: 'Geregistreerd dit jaar'
+        },
+        {
+            id: 3,
+            title: 'Bijzonder Verlof',
+            value: s.other_days_this_year ?? 0,
+            unit: 'dag',
+            description: 'Opgenomen overige uren'
+        }
+    ]
+
+    recentRequests.value = (data.recent_requests ?? []).map((r) => {
+        const start = r.start_date ?? r.start
+        const end = r.end_date ?? r.end
+        const days = r.workdays ?? r.days
+        return {
+            id: r.id,
+            title: r.title ?? typeLabels[r.type] ?? r.type,
+            period: end && end !== start ? `${formatDate(start)} - ${formatDate(end)}` : formatDate(start),
+            duration: r.duration ?? (days != null ? `${days} werkdagen` : ''),
+            status: statusLabels[r.status] ?? r.status
+        }
+    })
+}
+
+async function loadDashboard() {
+    const token = localStorage.getItem('token')
+    if (!token) {
+        error.value = 'Je bent niet ingelogd, dus de gegevens kunnen niet worden geladen.'
+        return
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/employee/dashboard`, {
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (!res.ok) throw new Error(`Status ${res.status}`)
+        applyData(await res.json())
+        error.value = ''
+    } catch (e) {
+        error.value = 'Het laden van je verlofgegevens is mislukt.'
+    }
+}
+
+onMounted(loadDashboard)
 
 function requestLeave() {
     router.push('/requestleave')
@@ -91,6 +149,8 @@ function statusClass(status) {
                 <p class="text-sm text-[#78716C] mt-1">
                     Hier is uw actuele verlofoverzicht voor dit kalenderjaar.
                 </p>
+
+                <p v-if="error" class="text-sm text-[#DC2626] mt-3">{{ error }}</p>
             </div>
 
             <Card
@@ -209,7 +269,7 @@ function statusClass(status) {
                                 </div>
 
                             </div>
-                            
+
                             <p
                                 v-if="recentRequests.length === 0"
                                 class="text-sm text-[#78716C] py-4"
