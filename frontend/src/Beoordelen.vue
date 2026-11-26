@@ -1,7 +1,9 @@
+
 <script setup>
 import { ref, computed, watch } from 'vue'
 import Button from 'primevue/button'
 import Sidebar from './components/ManagerSidebar.vue'
+let nextUiId = 0
 
 const requests = ref([
     {
@@ -34,17 +36,28 @@ const requests = ref([
         reason: 'Opname wegens overuren vorig project.',
         status: 'pending'
     }
-])
+].map(request => ({
+    ...request,
+    uiId: ++nextUiId
+})))
 
-const selectedIds = ref([1, 2])
+function addMockRequest(newRequest) {
+    requests.value.push({
+        ...newRequest,
+        uiId: ++nextUiId
+    })
+}
+
+const selectedUiIds = ref([
+    requests.value[0].uiId,
+    requests.value[1].uiId
+])
 
 const selectedType = ref('all')
 
-const pendingRequests = computed(() => {
-    return requests.value.filter(
-        request => request.status === 'pending'
-    )
-})
+const pendingRequests = computed(() =>
+    requests.value.filter(request => request.status === 'pending')
+)
 
 const filteredRequests = computed(() => {
     if (selectedType.value === 'all') {
@@ -56,64 +69,68 @@ const filteredRequests = computed(() => {
     )
 })
 
-const selectedCount = computed(() => {
-    return pendingRequests.value.filter(
-        request => selectedIds.value.includes(request.id)
+const selectedCount = computed(() =>
+    pendingRequests.value.filter(request =>
+        selectedUiIds.value.includes(request.uiId)
     ).length
-})
+)
 
 watch(selectedType, () => {
-    selectedIds.value = []
+    selectedUiIds.value = []
 })
 
-function approveRequest(id) {
+function approveRequest(uiId) {
     const request = requests.value.find(
-        request => request.id === id
+        request => request.uiId === uiId
     )
 
     if (!request || request.status !== 'pending') return
 
     request.status = 'approved'
 
-    selectedIds.value = selectedIds.value.filter(
-        selectedId => selectedId !== id
+    selectedUiIds.value = selectedUiIds.value.filter(
+        selectedId => selectedId !== uiId
     )
 }
 
-function rejectRequest(id) {
+function rejectRequest(uiId) {
     const request = requests.value.find(
-        request => request.id === id
+        request => request.uiId === uiId
     )
 
     if (!request || request.status !== 'pending') return
 
     request.status = 'rejected'
 
-    selectedIds.value = selectedIds.value.filter(
-        selectedId => selectedId !== id
+    selectedUiIds.value = selectedUiIds.value.filter(
+        selectedId => selectedId !== uiId
     )
 }
 
 function approveSelected() {
-    const selected = new Set(selectedIds.value)
+    const selected = new Set(selectedUiIds.value)
 
     requests.value.forEach(request => {
         if (
-            selected.has(request.id) &&
+            selected.has(request.uiId) &&
             request.status === 'pending'
         ) {
             request.status = 'approved'
         }
     })
 
-    selectedIds.value = []
+    selectedUiIds.value = []
 }
 </script>
 
 <template>
-    <div class="flex min-h-screen">
+    <div class="flex h-screen overflow-hidden">
         <Sidebar />
-        <main class="flex-1 min-w-0 min-h-screen bg-[#FAF8F5] p-8 text-[#292524]">
+        <main
+            class="flex-1 min-w-0 h-screen overflow-hidden
+                   bg-[#FAF8F5] p-8 text-[#292524]"
+        >
+
             <div class="border-b border-[#E8E3DF] pb-4">
                 <h1 class="text-2xl font-bold text-[#292524]">
                     Aanvragen Beoordelen
@@ -125,44 +142,65 @@ function approveSelected() {
                 </p>
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-4 mt-6 mb-6">
+            <div
+                class="flex flex-wrap items-center justify-between
+                       gap-4 mt-6 mb-6"
+            >
                 <div class="flex flex-wrap items-center gap-3">
 
-                    <Button :label="`Geselecteerde goedkeuren (${selectedCount})`" size="small"
+                    <Button
+                        :label="`Geselecteerde goedkeuren (${selectedCount})`"
+                        size="small"
                         :disabled="selectedCount === 0"
-                        class="!bg-[#F3F0ED] !border-[#F3F0ED] !text-[#17233C] !text-xs !font-semibold !rounded-lg !px-4 !py-2 disabled:!opacity-50"
-                        @click="approveSelected" />
+                        class="!bg-[#F3F0ED] !border-[#F3F0ED]
+                               !text-[#17233C] !text-xs !font-semibold
+                               !rounded-lg !px-4 !py-2
+                               disabled:!opacity-50"
+                        @click="approveSelected"
+                    />
 
                     <div class="flex items-center gap-1">
-                        <label for="leaveType" class="text-xs text-[#78716C]">
+                        <label
+                            for="leaveType"
+                            class="text-xs text-[#78716C]"
+                        >
                             Filteren op type:
                         </label>
 
-                        <select id="leaveType" v-model="selectedType"
-                            class="bg-transparent text-xs text-[#78716C] cursor-pointer outline-none focus:ring-2 focus:ring-[#1976D2] rounded">
+                        <select
+                            id="leaveType"
+                            v-model="selectedType"
+                            class="bg-transparent text-xs text-[#78716C]
+                                   cursor-pointer outline-none
+                                   focus:ring-2 focus:ring-[#1976D2] rounded"
+                        >
                             <option value="all">Alle verlof</option>
                             <option value="Vakantie">Vakantie</option>
-                            <option value="Persoonlijk">
-                                Persoonlijk
-                            </option>
-                            <option value="Compensatie">
-                                Compensatie
-                            </option>
+                            <option value="Persoonlijk">Persoonlijk</option>
+                            <option value="Compensatie">Compensatie</option>
                         </select>
                     </div>
                 </div>
 
                 <span class="text-xs text-[#78716C]">
-                    {{ pendingRequests.length }}
-                    openstaande verzoeken
+                    {{ pendingRequests.length }} openstaande verzoeken
                 </span>
             </div>
 
-            <div class="bg-white border border-[#E8E3DF] rounded-xl p-5 min-h-[245px]">
+            <div
+                class="bg-white border border-[#E8E3DF]
+                       rounded-xl p-5 min-h-0 overflow-hidden"
+            >
 
-                <div class="overflow-x-auto">
+                <div
+                    class="overflow-x-auto overflow-y-auto min-h-0"
+                    style="max-height: min(485px, calc(100dvh - 270px));"
+                >
 
-                    <table class="w-full min-w-[850px] table-fixed border-separate border-spacing-y-2 text-left">
+                    <table
+                        class="w-full min-w-[850px] table-fixed
+                               border-separate border-spacing-y-2 text-left"
+                    >
                         <colgroup>
                             <col style="width: 4%" />
                             <col style="width: 17%" />
@@ -174,74 +212,107 @@ function approveSelected() {
 
                         <thead>
                             <tr class="text-[#78716C]">
-
-                                <th class="text-xs font-semibold px-2 pb-3 border-b border-[#E8E3DF]">
+                                <th
+                                    class="sticky top-0 z-10 bg-white
+                                           text-xs font-semibold px-2 py-3
+                                           border-b border-[#E8E3DF]"
+                                >
                                     Bulk
                                 </th>
 
-                                <th class="text-xs font-semibold px-2 pb-3 border-b border-[#E8E3DF]">
+                                <th
+                                    class="sticky top-0 z-10 bg-white
+                                           text-xs font-semibold px-2 py-3
+                                           border-b border-[#E8E3DF]"
+                                >
                                     Medewerker
                                 </th>
 
-                                <th class="text-xs font-semibold px-2 pb-3 border-b border-[#E8E3DF]">
+                                <th
+                                    class="sticky top-0 z-10 bg-white
+                                           text-xs font-semibold px-2 py-3
+                                           border-b border-[#E8E3DF]"
+                                >
                                     Type & Periode
                                 </th>
 
-                                <th class="text-xs font-semibold px-2 pb-3 border-b border-[#E8E3DF]">
+                                <th
+                                    class="sticky top-0 z-10 bg-white
+                                           text-xs font-semibold px-2 py-3
+                                           border-b border-[#E8E3DF]"
+                                >
                                     Duur
                                 </th>
 
-                                <th class="text-xs font-semibold px-2 pb-3 border-b border-[#E8E3DF]">
+                                <th
+                                    class="sticky top-0 z-10 bg-white
+                                           text-xs font-semibold px-2 py-3
+                                           border-b border-[#E8E3DF]"
+                                >
                                     Reden van Aanvraag
                                 </th>
 
-                                <th class="text-xs font-semibold px-2 pb-3 border-b border-[#E8E3DF] text-right">
+                                <th
+                                    class="sticky top-0 z-10 bg-white
+                                           text-xs font-semibold px-2 py-3
+                                           border-b border-[#E8E3DF] text-right"
+                                >
                                     Acties
                                 </th>
-
                             </tr>
                         </thead>
 
                         <tbody>
-                            <tr v-for="request in filteredRequests" :key="request.id" class="transition-colors" :class="selectedIds.includes(request.id)
-                                    ? 'bg-[#FAF8F6]'
-                                    : 'bg-white hover:bg-[#FAF8F6]'
-                                ">
-
+                            <tr
+                                v-for="request in filteredRequests"
+                                :key="request.uiId"
+                                class="h-[64px] transition-colors"
+                                :class="
+                                    selectedUiIds.includes(request.uiId)
+                                        ? 'bg-[#FAF8F6]'
+                                        : 'bg-white hover:bg-[#FAF8F6]'
+                                "
+                            >
                                 <td class="px-2 py-3 rounded-l-lg">
-                                    <input v-model="selectedIds" type="checkbox" :value="request.id"
+                                    <input
+                                        v-model="selectedUiIds"
+                                        type="checkbox"
+                                        :value="request.uiId"
                                         :aria-label="`Selecteer aanvraag van ${request.employee}`"
-                                        class="w-4 h-4 accent-[#1976D2] cursor-pointer" />
+                                        class="w-4 h-4 accent-[#1976D2] cursor-pointer"
+                                    />
                                 </td>
 
                                 <td class="px-2 py-3">
                                     <div class="flex flex-col gap-1">
-
-                                        <span class="text-xs font-semibold text-[#292524]">
+                                        <span
+                                            class="text-xs font-semibold text-[#292524]"
+                                        >
                                             {{ request.employee }}
                                         </span>
 
                                         <span class="text-[11px] text-[#78716C]">
                                             {{ request.role }}
                                         </span>
-
                                     </div>
                                 </td>
 
                                 <td class="px-2 py-3">
                                     <div class="flex flex-col gap-1">
-
-                                        <span class="text-xs font-semibold" :class="request.type === 'Compensatie'
-                                                ? 'text-[#57534E]'
-                                                : 'text-[#1976D2]'
-                                            ">
+                                        <span
+                                            class="text-xs font-semibold"
+                                            :class="
+                                                request.type === 'Compensatie'
+                                                    ? 'text-[#57534E]'
+                                                    : 'text-[#1976D2]'
+                                            "
+                                        >
                                             {{ request.type }}
                                         </span>
 
                                         <span class="text-[11px] text-[#78716C]">
                                             {{ request.period }}
                                         </span>
-
                                     </div>
                                 </td>
 
@@ -258,30 +329,44 @@ function approveSelected() {
                                 </td>
 
                                 <td class="px-2 py-3 rounded-r-lg">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div
+                                        class="flex items-center
+                                               justify-end gap-2"
+                                    >
+                                        <Button
+                                            label="Afwijzen"
+                                            size="small"
+                                            outlined
+                                            severity="danger"
+                                            class="!text-[11px] !rounded-md
+                                                   !px-2 !py-1 !border-[#DC2626]
+                                                   !text-[#DC2626] !bg-transparent"
+                                            @click="rejectRequest(request.uiId)"
+                                        />
 
-                                        <Button label="Afwijzen" size="small" outlined severity="danger"
-                                            class="!text-[11px] !rounded-md !px-2 !py-1 !border-[#DC2626] !text-[#DC2626] !bg-transparent"
-                                            @click="rejectRequest(request.id)" />
-
-                                        <Button label="Goedkeuren" size="small"
-                                            class="!text-[11px] !rounded-md !px-2 !py-1 !bg-[#1976D2] !border-[#1976D2] !text-white"
-                                            @click="approveRequest(request.id)" />
-
+                                        <Button
+                                            label="Goedkeuren"
+                                            size="small"
+                                            class="!text-[11px] !rounded-md
+                                                   !px-2 !py-1 !bg-[#1976D2]
+                                                   !border-[#1976D2] !text-white"
+                                            @click="approveRequest(request.uiId)"
+                                        />
                                     </div>
                                 </td>
-
                             </tr>
                         </tbody>
                     </table>
 
-                    <div v-if="filteredRequests.length === 0" class="text-center text-sm text-[#78716C] py-12">
+                    <div
+                        v-if="filteredRequests.length === 0"
+                        class="text-center text-sm text-[#78716C] py-12"
+                    >
                         Geen openstaande verlofaanvragen gevonden.
                     </div>
 
                 </div>
             </div>
-
         </main>
     </div>
 </template>
