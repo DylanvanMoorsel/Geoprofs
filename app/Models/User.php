@@ -66,9 +66,11 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'manager_id');
     }
 
-    public function absences()
+        public function absences()
     {
         return $this->hasMany(Absence::class);
+    }
+
     public function leaveRequests()
     {
         return $this->hasMany(LeaveRequest::class);
