@@ -23,6 +23,7 @@ class User extends Authenticatable
         'department_id',
         'manager_id',
         'vacation_hours',
+        'is_present',
     ];
 
     protected $hidden = [
@@ -36,6 +37,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'vacation_hours' => 'float',
+            'is_present' => 'boolean',
         ];
     }
 
@@ -67,5 +69,8 @@ class User extends Authenticatable
     public function absences()
     {
         return $this->hasMany(Absence::class);
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class);
     }
 }
