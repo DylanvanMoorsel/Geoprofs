@@ -1,16 +1,113 @@
 <script setup>
 import Sidebar from './components/ManagerSidebar.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 
+const router = useRouter()
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://geoprofs.test/api'
+
 const dashboard = ref({
-    pendingRequests: 4,
-    employeesPresent: 15,
-    employeesTotal: 17,
-    tomorrowCoverage: 80,
+    pendingRequests: 0,
+    employeesPresent: 0,
+    employeesTotal: 0,
+    tomorrowCoverage: 0,
     minimumCoverage: 75
 })
+const priorityRequests = ref([])
+const absentEmployees = ref([])
+const loading = ref(true)
+const error = ref('')
+
+const TYPE_LABELS = {
+    vakantie: 'Vakantie',
+    ziekte: 'Ziek gemeld',
+    afspraak: 'Afspraak',
+    overig: 'Bijzonder verlof'
+}
+const TYPE_COLORS = {
+    vakantie: '#EA580C',
+    ziekte: '#DC2626',
+    afspraak: '#1976D2',
+    overig: '#1976D2'
+}
+
+function authHeaders() {
+    return {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Accept: 'application/json',
+    }
+}
+
+function shortDate(iso) {
+    return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
+}
+
+function applyData(data) {
+    dashboard.value = {
+        pendingRequests: data.pending_requests,
+        employeesPresent: data.today?.present ?? 0,
+        employeesTotal: data.today?.total ?? 0,
+        tomorrowCoverage: data.tomorrow?.percentage ?? 0,
+        minimumCoverage: data.minimum_coverage
+    }
+
+    priorityRequests.value = data.priority_requests.map(request => ({
+        id: request.id,
+        employee: request.employee.name,
+        type: TYPE_LABELS[request.type] ?? request.type,
+        days: request.workdays,
+        status: 'pending'
+    }))
+
+    absentEmployees.value = data.absent_today.map(absent => ({
+        id: absent.id,
+        employee: absent.name,
+        reason: TYPE_LABELS[absent.type] ?? absent.type,
+        period: absent.start_date === absent.end_date
+            ? 'Vandaag'
+            : `t/m ${shortDate(absent.end_date)}`,
+        color: TYPE_COLORS[absent.type] ?? '#78716C'
+    }))
+}
+
+async function loadDashboard() {
+    if (!localStorage.getItem('token')) {
+        error.value = 'Je bent niet ingelogd. Log eerst in als manager.'
+        loading.value = false
+        return
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/manager/dashboard`, { headers: authHeaders() })
+
+        if (response.status === 401) {
+            localStorage.removeItem('token')
+            error.value = 'Je sessie is verlopen. Log opnieuw in als manager.'
+            return
+        }
+
+        if (response.status === 403) {
+            error.value = 'Dit account is geen manager.'
+            return
+        }
+
+        if (!response.ok) {
+            error.value = `Er ging iets mis op de server (${response.status}).`
+            return
+        }
+
+        applyData(await response.json())
+        error.value = ''
+    } catch {
+        error.value = 'De server is niet bereikbaar.'
+    } finally {
+        loading.value = false
+    }
+}
+
+onMounted(loadDashboard)
 
 const presencePercentage = computed(() => {
     if (dashboard.value.employeesTotal === 0) return 0
@@ -21,66 +118,34 @@ const presencePercentage = computed(() => {
     )
 })
 
-const priorityRequests = ref([
-    {
-        id: 1,
-        employee: 'Pim van der Vlist',
-        type: 'Vakantie',
-        days: 5,
-        status: 'pending'
-    },
-    {
-        id: 2,
-        employee: 'Lieke de Boer',
-        type: 'Persoonlijk verlof',
-        days: 1,
-        status: 'pending'
-    }
-])
-
-const absentEmployees = ref([
-    {
-        id: 1,
-        employee: 'Willem Bakker',
-        reason: 'Vakantie',
-        period: 't/m 29 Jul',
-        color: '#EA580C'
-    },
-    {
-        id: 2,
-        employee: 'Sanne Klaassen',
-        reason: 'Ziek gemeld',
-        period: 'Dag 2',
-        color: '#DC2626'
-    },
-    {
-        id: 3,
-        employee: 'Mark Peeters',
-        reason: 'Bijzonder verlof',
-        period: 'Verhuizing',
-        color: '#1976D2'
-    }
-])
-
 const pendingPriorityRequests = computed(() => {
     return priorityRequests.value.filter(
         request => request.status === 'pending'
     )
 })
 
-function approveRequest(id) {
-    const request = priorityRequests.value.find(
-        request => request.id === id
-    )
+async function approveRequest(id) {
+    const request = priorityRequests.value.find(request => request.id === id)
 
     if (!request || request.status !== 'pending') return
 
-    request.status = 'approved'
+    try {
+        const response = await fetch(`${API_URL}/manager/absences/${id}/approve`, {
+            method: 'POST',
+            headers: authHeaders(),
+        })
 
-    dashboard.value.pendingRequests = Math.max(
-        0,
-        dashboard.value.pendingRequests - 1
-    )
+        if (!response.ok) {
+            const body = await response.json().catch(() => ({}))
+            error.value = body.errors?.absence?.[0] ?? body.message ?? 'Goedkeuren is mislukt.'
+            return
+        }
+
+        error.value = ''
+        await loadDashboard()
+    } catch {
+        error.value = 'De server is niet bereikbaar.'
+    }
 }
 </script>
 
@@ -97,6 +162,8 @@ function approveRequest(id) {
                     Real-time overzicht van afdelingsbezetting, openstaande aanvragen en teamstatus.
                 </p>
             </div>
+
+            <p v-if="error" class="mt-4 text-sm text-red-600">{{ error }}</p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 <Card class="border border-[#E8E3DF] shadow-none rounded-xl">
